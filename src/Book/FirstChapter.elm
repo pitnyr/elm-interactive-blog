@@ -1,14 +1,14 @@
 module Book.FirstChapter exposing (firstChapter)
 
-import ElmBook.Chapter as EB
+import ElmBook.Chapter as BC
 import Html as H
 
 
-firstChapter : EB.Chapter x
+firstChapter : BC.Chapter x
 firstChapter =
-    EB.chapter "The First Chapter"
-        |> EB.withComponent component
-        |> EB.render content
+    BC.chapter "The First Chapter"
+        |> BC.withComponent component
+        |> BC.render content
 
 
 component : H.Html msg

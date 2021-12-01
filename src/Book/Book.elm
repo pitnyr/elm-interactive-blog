@@ -1,12 +1,33 @@
 module Book.Book exposing (main)
 
+import Book.CounterChapter as CounterChapter
 import Book.FirstChapter as FirstChapter
-import ElmBook as EB
+import Book.InputChapter as InputChapter
+import ElmBook as B
+import ElmBook.StatefulOptions as BS
 
 
-main : EB.Book ()
+type alias SharedState =
+    { inputModel : InputChapter.Model
+    , counterModel : CounterChapter.Model
+    }
+
+
+initialState : SharedState
+initialState =
+    { inputModel = InputChapter.init
+    , counterModel = CounterChapter.init
+    }
+
+
+main : B.Book SharedState
 main =
-    EB.book "Book"
-        |> EB.withChapters
+    B.book "Stateful Book"
+        |> B.withStatefulOptions
+            [ BS.initialState initialState
+            ]
+        |> B.withChapters
             [ FirstChapter.firstChapter
+            , CounterChapter.chapter
+            , InputChapter.chapter
             ]
