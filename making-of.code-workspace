@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": ".gh-pages"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"making-of.publishUrl": "https://pitnyr.github.io/elm-interactive-blog/",
+		"making-of.sourceUrl": "https://github.com/pitnyr/elm-interactive-blog/"
+	}
+}
