@@ -118,12 +118,9 @@ shawView : Model -> H.Html Msg
 shawView model =
     H.div []
         [ H.h1 [] [ H.text "Shaw's Method" ]
-        , H.label
-            [ HA.class "input-sizer"
-            , HA.class "stacked"
-            , HA.attribute "data-value" model.inputText
-            ]
+        , H.label [ HA.class "input-sizer" ]
             [ H.span [] [ H.text "Fixed Heading" ]
+            , H.div [ HA.class "replica" ] (styledContent model.inputText)
             , H.textarea
                 [ HE.onInput EditorInput
                 , HA.rows 1
@@ -133,3 +130,28 @@ shawView model =
                 []
             ]
         ]
+
+
+styledContent : String -> List (H.Html msg)
+styledContent text =
+    text
+        |> String.split "\n"
+        |> List.map (\line -> H.div [] (styledLine line))
+
+
+styledLine : String -> List (H.Html msg)
+styledLine line =
+    String.split " " line
+        |> List.indexedMap
+            (\idx word ->
+                H.span
+                    [ HA.style "color"
+                        (if modBy 2 idx > 0 then
+                            "red"
+
+                         else
+                            "blue"
+                        )
+                    ]
+                    [ H.text <| word ++ " " ]
+            )
