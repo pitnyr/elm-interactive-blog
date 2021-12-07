@@ -76,6 +76,14 @@ getRows scrollHeight =
 
 view : Model -> H.Html Msg
 view model =
+    H.div []
+        [ ohanhiView model
+        , shawView model
+        ]
+
+
+ohanhiView : Model -> H.Html Msg
+ohanhiView model =
     H.div [ HA.style "width" "400px" ]
         [ H.h1 [] [ H.text "Ohanhi's Method" ]
         , H.textarea
@@ -104,3 +112,24 @@ inputDecoder =
     JD.map2 NewValues
         (JD.at [ "target", "value" ] JD.string)
         (JD.at [ "target", "scrollHeight" ] JD.int)
+
+
+shawView : Model -> H.Html Msg
+shawView model =
+    H.div []
+        [ H.h1 [] [ H.text "Shaw's Method" ]
+        , H.label
+            [ HA.class "input-sizer"
+            , HA.class "stacked"
+            , HA.attribute "data-value" model.inputText
+            ]
+            [ H.span [] [ H.text "Text: " ]
+            , H.textarea
+                [ HE.onInput EditorInput
+                , HA.rows 1
+                , HA.placeholder "hi"
+                , HA.value model.inputText
+                ]
+                []
+            ]
+        ]
