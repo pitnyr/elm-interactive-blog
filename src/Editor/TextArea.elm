@@ -123,11 +123,11 @@ shawView model =
             , HA.class "stacked"
             , HA.attribute "data-value" model.inputText
             ]
-            [ H.span [] [ H.text "Text: " ]
+            [ H.span [] [ H.text "Fixed Heading" ]
             , H.textarea
                 [ HE.onInput EditorInput
                 , HA.rows 1
-                , HA.placeholder "hi"
+                , HA.placeholder "Placeholder"
                 , HA.value model.inputText
                 ]
                 []
