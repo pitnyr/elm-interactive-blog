@@ -24,6 +24,7 @@
   textarea {
     background: none;
     color: transparent;
+    caret-color: black;
   }
 
   .replica {
@@ -37,11 +38,6 @@
     
     textarea:focus {
       outline: none;
-      color: black;
-    }
-
-    .replica {
-      visibility: hidden;
     }
   }
 }
