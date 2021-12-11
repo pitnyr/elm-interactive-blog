@@ -1,12 +1,14 @@
 module Editor.TextArea exposing (main)
 
--- Ohanhis method: https://gist.github.com/ohanhi/cb42ba2587fefbdae6962518176d114a
--- Expands only
+-- Ohanhi's method: https://gist.github.com/ohanhi/cb42ba2587fefbdae6962518176d114a - Expands only
+-- Shawns's method: https://codepen.io/shshaw/pen/bGNJJBE
 
 import Browser
-import Html as H
-import Html.Attributes as HA
-import Html.Events as HE
+import Css as C
+import Css.Global as CG
+import Html.Styled as H
+import Html.Styled.Attributes as HA
+import Html.Styled.Events as HE
 import Json.Decode as JD
 
 
@@ -15,7 +17,7 @@ main =
     Browser.sandbox
         { init = init
         , update = update
-        , view = view
+        , view = view >> H.toUnstyled
         }
 
 
@@ -78,7 +80,7 @@ view : Model -> H.Html Msg
 view model =
     H.div []
         [ ohanhiView model
-        , shawView model
+        , shawViewInElm model
         ]
 
 
@@ -114,26 +116,17 @@ inputDecoder =
         (JD.at [ "target", "scrollHeight" ] JD.int)
 
 
-shawView : Model -> H.Html Msg
-shawView model =
+shawViewInElm : Model -> H.Html Msg
+shawViewInElm model =
     H.div []
-        [ H.h1 [] [ H.text "Shaw's Method" ]
-        , H.label [ HA.class "input-sizer" ]
-            [ H.span [] [ H.text "Fixed Heading" ]
-            , H.div [ HA.class "replica" ] (styledContent model.inputText)
-            , H.textarea
-                [ HE.onInput EditorInput
-                , HA.rows 1
-                , HA.placeholder "Placeholder"
-                , HA.value model.inputText
-                ]
-                []
-            ]
+        [ H.h1 [] [ H.text "Shaw's Method in Elm" ]
+        , editorComponent model.inputText (styledText model.inputText) (Just "Fixed Heading") (Just "Placeholder 1")
+        , editorComponent model.inputText (styledText model.inputText) Nothing (Just "Placeholder 2")
         ]
 
 
-styledContent : String -> List (H.Html msg)
-styledContent text =
+styledText : String -> List (H.Html msg)
+styledText text =
     text
         |> String.split "\n"
         |> List.map (\line -> H.div [] (styledLine line))
@@ -155,3 +148,86 @@ styledLine line =
                     ]
                     [ H.text <| word ++ " " ]
             )
+
+
+editorComponent : String -> List (H.Html Msg) -> Maybe String -> Maybe String -> H.Html Msg
+editorComponent plainContent styledContent firstLine placeholder =
+    let
+        withOptionalFirstLine : List (H.Html Msg) -> List (H.Html Msg)
+        withOptionalFirstLine children =
+            case firstLine of
+                Just firstLineText ->
+                    H.span [] [ H.text firstLineText ] :: children
+
+                Nothing ->
+                    children
+
+        withOptionalPlaceholder : List (H.Attribute Msg) -> List (H.Attribute Msg)
+        withOptionalPlaceholder attributes =
+            case placeholder of
+                Just placeholderText ->
+                    HA.placeholder placeholderText :: attributes
+
+                Nothing ->
+                    attributes
+    in
+    H.label [ HA.css editorStyle ]
+        (withOptionalFirstLine
+            [ H.div [ HA.class "styled-editor-content" ] styledContent
+            , H.textarea
+                (withOptionalPlaceholder
+                    [ HE.onInput EditorInput
+                    , HA.value plainContent
+                    , HA.rows 1
+                    ]
+                )
+                []
+            ]
+        )
+
+
+editorStyle : List C.Style
+editorStyle =
+    [ C.property "display" "inline-grid"
+    , C.verticalAlign C.top
+    , C.position C.relative
+    , C.border2 (C.px 1) C.solid
+    , C.padding (C.em 0.5)
+    , C.margin (C.px 5)
+    , CG.descendants
+        [ CG.each [ CG.class "styled-editor-content", CG.textarea ]
+            [ C.property "grid-area" "2/1"
+            , C.width C.auto
+            , C.minWidth (C.em 1)
+            , C.property "font" "inherit"
+            , C.padding C.zero
+            , C.margin C.zero
+            , C.resize C.none
+            , C.property "appearance" "none"
+            , C.property "border" "none"
+            ]
+        , CG.textarea
+            [ C.property "background" "none"
+            , C.color C.transparent
+            , C.property "caret-color" "black"
+            ]
+        , CG.class "styled-editor-content"
+            [ C.whiteSpace C.preWrap
+            ]
+        ]
+    , C.pseudoClass "focus-within"
+        [ C.outline3 (C.px 2) C.solid (C.hex "00F")
+        , CG.children
+            [ CG.span
+                [ C.color (C.hex "00F")
+                ]
+            ]
+        , CG.descendants
+            [ CG.textarea
+                [ C.focus
+                    [ C.outline C.none
+                    ]
+                ]
+            ]
+        ]
+    ]

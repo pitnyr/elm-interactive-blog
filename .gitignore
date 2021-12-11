@@ -1,4 +1,2 @@
 .gh-pages/
-dist/*.css
-dist/*.js
 elm-stuff/
