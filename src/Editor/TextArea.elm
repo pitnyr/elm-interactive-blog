@@ -47,7 +47,12 @@ config =
 init : Model
 init =
     { rows = config.minRows
-    , inputText = ""
+    , inputText = """Fixed Heading
+
+xxxShaw's Method in Elm
+ xxShaw's Method in Elm
+  xShaw's Method in Elm
+   Shaw's Method in Elm"""
     }
 
 
@@ -138,62 +143,67 @@ styledLine line =
         |> List.indexedMap
             (\idx word ->
                 H.span
-                    [ HA.style "color"
-                        (if modBy 2 idx > 0 then
-                            "red"
-
-                         else
-                            "blue"
-                        )
+                    [ HA.style "color" (wordColor idx)
+                    , HA.style "fontWeight" (wordWeight idx)
                     ]
                     [ H.text <| word ++ " " ]
             )
 
 
+wordColor : Int -> String
+wordColor index =
+    if modBy 2 index > 0 then
+        "red"
+
+    else
+        "blue"
+
+
+wordWeight : Int -> String
+wordWeight index =
+    if modBy 3 index > 0 then
+        "normal"
+
+    else
+        "bold"
+
+
 editorComponent : String -> List (H.Html Msg) -> Maybe String -> Maybe String -> H.Html Msg
 editorComponent plainContent styledContent firstLine placeholder =
-    let
-        withOptionalFirstLine : List (H.Html Msg) -> List (H.Html Msg)
-        withOptionalFirstLine children =
-            case firstLine of
-                Just firstLineText ->
-                    H.span [] [ H.text firstLineText ] :: children
-
-                Nothing ->
-                    children
-
-        withOptionalPlaceholder : List (H.Attribute Msg) -> List (H.Attribute Msg)
-        withOptionalPlaceholder attributes =
-            case placeholder of
-                Just placeholderText ->
-                    HA.placeholder placeholderText :: attributes
-
-                Nothing ->
-                    attributes
-    in
     H.label [ HA.css editorStyle ]
-        (withOptionalFirstLine
-            [ H.div [ HA.class "styled-editor-content" ] styledContent
-            , H.textarea
-                (withOptionalPlaceholder
-                    [ HE.onInput EditorInput
-                    , HA.value plainContent
-                    , HA.rows 1
-                    ]
-                )
-                []
-            ]
+        ([ H.div [ HA.class "styled-editor-content" ] styledContent
+         , H.textarea
+            ([ HE.onInput EditorInput
+             , HA.value plainContent
+             , HA.rows 1
+             ]
+                |> addOptional placeholder HA.placeholder
+            )
+            []
+         ]
+            |> addOptional firstLine (\t -> H.span [] [ H.text t ])
         )
+
+
+addOptional : Maybe a -> (a -> b) -> List b -> List b
+addOptional maybe fun list =
+    case maybe of
+        Just value ->
+            fun value :: list
+
+        Nothing ->
+            list
 
 
 editorStyle : List C.Style
 editorStyle =
     [ C.property "display" "inline-grid"
-    , C.verticalAlign C.top
+    , C.verticalAlign C.bottom
     , C.position C.relative
     , C.border2 (C.px 1) C.solid
     , C.padding (C.em 0.5)
     , C.margin (C.px 5)
+    , C.fontFamily C.monospace
     , CG.descendants
         [ CG.each [ CG.class "styled-editor-content", CG.textarea ]
             [ C.property "grid-area" "2/1"
@@ -208,6 +218,7 @@ editorStyle =
             ]
         , CG.textarea
             [ C.property "background" "none"
+            , C.outline C.none
             , C.color C.transparent
             , C.property "caret-color" "black"
             ]
@@ -220,13 +231,6 @@ editorStyle =
         , CG.children
             [ CG.span
                 [ C.color (C.hex "00F")
-                ]
-            ]
-        , CG.descendants
-            [ CG.textarea
-                [ C.focus
-                    [ C.outline C.none
-                    ]
                 ]
             ]
         ]
