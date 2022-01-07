@@ -10,6 +10,7 @@ import Html.Styled as H
 import Html.Styled.Attributes as HA
 import Html.Styled.Events as HE
 import Json.Decode as JD
+import Json.Encode as JE
 
 
 main : Program () Model Msg
@@ -24,6 +25,7 @@ main =
 type alias Model =
     { rows : Int
     , inputText : String
+    , selection : Maybe ( Int, Int )
     }
 
 
@@ -47,18 +49,25 @@ config =
 init : Model
 init =
     { rows = config.minRows
-    , inputText = """Fixed Heading
+    , inputText = initialText
+    , selection = Nothing
+    }
+
+
+initialText : String
+initialText =
+    """Fixed Heading
 
 xxxShaw's Method in Elm
  xxShaw's Method in Elm
   xShaw's Method in Elm
    Shaw's Method in Elm"""
-    }
 
 
 type Msg
     = NewValues String Int
     | EditorInput String
+    | ResetTextAndSelection
 
 
 update : Msg -> Model -> Model
@@ -68,10 +77,20 @@ update msg model =
             { model
                 | inputText = inputText
                 , rows = getRows height
+                , selection = Nothing
             }
 
         EditorInput text ->
-            { model | inputText = text }
+            { model
+                | inputText = text
+                , selection = Nothing
+            }
+
+        ResetTextAndSelection ->
+            { model
+                | inputText = initialText
+                , selection = Just ( 90, 103 )
+            }
 
 
 getRows : Int -> Int
@@ -84,8 +103,17 @@ getRows scrollHeight =
 view : Model -> H.Html Msg
 view model =
     H.div []
-        [ ohanhiView model
+        [ controlView
+        , ohanhiView model
         , shawViewInElm model
+        ]
+
+
+controlView : H.Html Msg
+controlView =
+    H.div []
+        [ H.h1 [] [ H.text "Editor Component Tests" ]
+        , H.button [ HE.onClick ResetTextAndSelection ] [ H.text "Reset Text and Selection" ]
         ]
 
 
@@ -125,8 +153,8 @@ shawViewInElm : Model -> H.Html Msg
 shawViewInElm model =
     H.div []
         [ H.h1 [] [ H.text "Shaw's Method in Elm" ]
-        , editorComponent model.inputText (styledText model.inputText) (Just "Fixed Heading") (Just "Placeholder 1")
-        , editorComponent model.inputText (styledText model.inputText) Nothing (Just "Placeholder 2")
+        , editorComponent model.inputText (styledText model.inputText) model.selection (Just "Fixed Heading") (Just "Placeholder 1")
+        , editorComponent model.inputText (styledText model.inputText) model.selection Nothing (Just "Placeholder 2")
         ]
 
 
@@ -168,8 +196,8 @@ wordWeight index =
         "bold"
 
 
-editorComponent : String -> List (H.Html Msg) -> Maybe String -> Maybe String -> H.Html Msg
-editorComponent plainContent styledContent firstLine placeholder =
+editorComponent : String -> List (H.Html Msg) -> Maybe ( Int, Int ) -> Maybe String -> Maybe String -> H.Html Msg
+editorComponent plainContent styledContent selection firstLine placeholder =
     H.label [ HA.css editorStyle ]
         ([ H.div [ HA.class "styled-editor-content" ] styledContent
          , H.textarea
@@ -178,6 +206,8 @@ editorComponent plainContent styledContent firstLine placeholder =
              , HA.rows 1
              ]
                 |> addOptional placeholder HA.placeholder
+                |> addOptional selection (HA.property "selectionStart" << JE.int << Tuple.first)
+                |> addOptional selection (HA.property "selectionEnd" << JE.int << Tuple.second)
             )
             []
          ]
