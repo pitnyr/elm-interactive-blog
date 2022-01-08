@@ -3,7 +3,8 @@ module Book.FirstChapter exposing (firstChapter)
 import Book.CounterChapter as CounterChapter
 import Book.InputChapter as InputChapter
 import ElmBook.Chapter as BC
-import Html as H
+import ElmBook.ElmCSS as CS
+import Html.Styled as H
 
 
 type alias SharedState x =
@@ -13,7 +14,7 @@ type alias SharedState x =
     }
 
 
-firstChapter : BC.Chapter (SharedState x)
+firstChapter : CS.Chapter (SharedState x)
 firstChapter =
     BC.chapter "The First Chapter"
         |> BC.withComponentList
