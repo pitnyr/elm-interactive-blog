@@ -2,8 +2,9 @@ module Book.CounterChapter exposing (Model, chapter, init)
 
 import ElmBook.Actions as BA
 import ElmBook.Chapter as BC
-import Html as H
-import Html.Events as HE
+import ElmBook.ElmCSS as CS
+import Html.Styled as H
+import Html.Styled.Events as HE
 
 
 type alias SharedState x =
@@ -24,7 +25,7 @@ init =
     0
 
 
-chapter : BC.Chapter (SharedState x)
+chapter : CS.Chapter (SharedState x)
 chapter =
     BC.chapter "Counter Chapter"
         |> BC.withStatefulComponent

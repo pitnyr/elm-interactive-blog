@@ -4,7 +4,7 @@ import Css as C
 import Css.Global as CG
 import ElmBook.Actions as BA
 import ElmBook.Chapter as BC
-import Html
+import ElmBook.ElmCSS as CS
 import Html.Styled as H
 import Html.Styled.Attributes as HA
 import Html.Styled.Events as HE
@@ -65,7 +65,7 @@ init =
     }
 
 
-chapter : BC.Chapter (SharedState x)
+chapter : CS.Chapter (SharedState x)
 chapter =
     BC.chapter "Editor Chapter"
         |> BC.withStatefulComponentList
@@ -104,22 +104,20 @@ Happy coding!
 """
 
 
-editorComponent : { value : EditorModel, onInput : String -> msg } -> Html.Html msg
+editorComponent : { value : EditorModel, onInput : String -> msg } -> H.Html msg
 editorComponent { value, onInput } =
-    H.toUnstyled
-        (H.label [ HA.css editorStyle ]
-            ([ H.div [ HA.class "styled-editor-content" ] (styledText value.text)
-             , H.textarea
-                ([ HE.onInput onInput
-                 , HA.value value.text
-                 , HA.rows 1
-                 ]
-                    |> addOptional value.placeholder HA.placeholder
-                )
-                []
+    H.label [ HA.css editorStyle ]
+        ([ H.div [ HA.class "styled-editor-content" ] (styledText value.text)
+         , H.textarea
+            ([ HE.onInput onInput
+             , HA.value value.text
+             , HA.rows 1
              ]
-                |> addOptional value.header (\t -> H.span [] [ H.text t ])
+                |> addOptional value.placeholder HA.placeholder
             )
+            []
+         ]
+            |> addOptional value.header (\t -> H.span [] [ H.text t ])
         )
 
 

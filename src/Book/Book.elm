@@ -5,6 +5,7 @@ import Book.EditorChapter as EditorChapter
 import Book.FirstChapter as FirstChapter
 import Book.InputChapter as InputChapter
 import ElmBook as B
+import ElmBook.ElmCSS as CS
 import ElmBook.StatefulOptions as BS
 
 
@@ -23,9 +24,9 @@ initialState =
     }
 
 
-main : B.Book SharedState
+main : CS.Book SharedState
 main =
-    B.book "Stateful Book"
+    CS.book "Stateful Book"
         |> B.withStatefulOptions
             [ BS.initialState initialState
             ]
