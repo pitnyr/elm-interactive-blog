@@ -11,7 +11,7 @@ Explore ideas and create tools for writing interactive Elm blogs.
 Must
 
 - [x] [Based on elm-book](#commit-2021-12-02-20-50)
-- [ ] Users can enter Elm code
+- [x] [Users can enter Elm code](#users-can-enter-elm-code)
 - [ ] Elm code is parsed
 - [ ] Parsed code can be executed
 - [ ] Entered code is stored in localstorage
@@ -42,4 +42,18 @@ A part of this is setting up an elm-book environment.
 subject: Merge branch 'setup'
 
 Setup the project structure.
+```
+
+
+<a id="commit-2022-01-08-13-27"></a>
+
+## Users can enter Elm code
+
+This will be ... interesting. Details see feature branch [editor](editor.md).
+
+[commit-2022-01-08-13-27](https://github.com/pitnyr/elm-interactive-blog/commit/8584d5d64736e693dad562d98280b5e0c95763a4)
+```email
+subject: Merge branch 'editor'
+
+Implemented an editor component where users can enter Elm code.
 ```
