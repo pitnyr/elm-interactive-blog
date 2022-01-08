@@ -1,4 +1,4 @@
-module Book.EditorChapter exposing (Model, chapter, init)
+module Book.EditorChapter exposing (EditorModel, chapter, initOne, initTwo)
 
 import Css as C
 import Css.Global as CG
@@ -11,36 +11,20 @@ import Html.Styled.Events as HE
 
 
 type alias SharedState x =
-    { x | editorModel : Model }
-
-
-updateSharedState : (String -> Model -> Model) -> String -> SharedState x -> SharedState x
-updateSharedState updateFun value x =
-    { x | editorModel = updateFun value x.editorModel }
-
-
-updateEditorOne : String -> Model -> Model
-updateEditorOne value model =
-    let
-        oldModel =
-            model.editorOne
-    in
-    { model | editorOne = { oldModel | text = value } }
-
-
-updateEditorTwo : String -> Model -> Model
-updateEditorTwo value model =
-    let
-        oldModel =
-            model.editorTwo
-    in
-    { model | editorTwo = { oldModel | text = value } }
-
-
-type alias Model =
-    { editorOne : EditorModel
-    , editorTwo : EditorModel
+    { x
+        | editorOne : EditorModel
+        , editorTwo : EditorModel
     }
+
+
+setEditorOne : EditorModel -> SharedState x -> SharedState x
+setEditorOne editor state =
+    { state | editorOne = editor }
+
+
+setEditorTwo : EditorModel -> SharedState x -> SharedState x
+setEditorTwo editor state =
+    { state | editorTwo = editor }
 
 
 type alias EditorModel =
@@ -50,39 +34,38 @@ type alias EditorModel =
     }
 
 
-init : Model
-init =
-    { editorOne =
-        { header = Nothing
-        , placeholder = Just "First input"
-        , text = ""
-        }
-    , editorTwo =
-        { header = Just "Fixed Header"
-        , placeholder = Just "Second input"
-        , text = ""
-        }
+initOne : EditorModel
+initOne =
+    { header = Nothing
+    , placeholder = Just "First input"
+    , text = ""
     }
+
+
+initTwo : EditorModel
+initTwo =
+    { header = Just "Fixed Header"
+    , placeholder = Just "Second input"
+    , text = ""
+    }
+
+
+updateEditorOne : String -> EditorModel -> EditorModel
+updateEditorOne text editor =
+    { editor | text = text }
+
+
+updateEditorTwo : String -> EditorModel -> EditorModel
+updateEditorTwo text editor =
+    { editor | text = text }
 
 
 chapter : CS.Chapter (SharedState x)
 chapter =
     BC.chapter "Editor Chapter"
         |> BC.withStatefulComponentList
-            [ ( "editorOne"
-              , \{ editorModel } ->
-                    editorComponent
-                        { value = editorModel.editorOne
-                        , onInput = BA.updateStateWith (updateSharedState updateEditorOne)
-                        }
-              )
-            , ( "editorTwo"
-              , \{ editorModel } ->
-                    editorComponent
-                        { value = editorModel.editorTwo
-                        , onInput = BA.updateStateWith (updateSharedState updateEditorTwo)
-                        }
-              )
+            [ ( "editorOne", editorComponent .editorOne setEditorOne updateEditorOne BA.updateStateWith )
+            , ( "editorTwo", editorComponent .editorTwo setEditorTwo updateEditorTwo BA.updateStateWith )
             ]
         |> BC.render content
 
@@ -104,20 +87,38 @@ Happy coding!
 """
 
 
-editorComponent : { value : EditorModel, onInput : String -> msg } -> H.Html msg
-editorComponent { value, onInput } =
+editorComponent :
+    (state -> EditorModel)
+    -> (EditorModel -> state -> state)
+    -> (String -> EditorModel -> EditorModel)
+    -> ((String -> state -> state) -> String -> msg)
+    -> state
+    -> H.Html msg
+editorComponent getter setter updateEditor updateState stateForView =
+    editorView (getter stateForView)
+        (updateState
+            (\text stateForUpdate ->
+                setter
+                    (getter stateForUpdate |> updateEditor text)
+                    stateForUpdate
+            )
+        )
+
+
+editorView : EditorModel -> (String -> msg) -> H.Html msg
+editorView model onInput =
     H.label [ HA.css editorStyle ]
-        ([ H.div [ HA.class "styled-editor-content" ] (styledText value.text)
+        ([ H.div [ HA.class "styled-editor-content" ] (styledText model.text)
          , H.textarea
             ([ HE.onInput onInput
-             , HA.value value.text
+             , HA.value model.text
              , HA.rows 1
              ]
-                |> addOptional value.placeholder HA.placeholder
+                |> addOptional model.placeholder HA.placeholder
             )
             []
          ]
-            |> addOptional value.header (\t -> H.span [] [ H.text t ])
+            |> addOptional model.header (\t -> H.span [] [ H.text t ])
         )
 
 
@@ -172,17 +173,11 @@ wordWeight index =
 editorStyle : List C.Style
 editorStyle =
     [ C.property "display" "inline-grid"
-    , C.verticalAlign C.bottom
-    , C.position C.relative
-    , C.border2 (C.px 1) C.solid
-    , C.padding (C.em 0.5)
-    , C.margin (C.px 5)
+    , C.width (C.pct 100)
     , C.fontFamily C.monospace
     , CG.descendants
         [ CG.each [ CG.class "styled-editor-content", CG.textarea ]
             [ C.property "grid-area" "2/1"
-            , C.width C.auto
-            , C.minWidth (C.em 1)
             , C.property "font" "inherit"
             , C.padding C.zero
             , C.margin C.zero
@@ -198,14 +193,6 @@ editorStyle =
             ]
         , CG.class "styled-editor-content"
             [ C.whiteSpace C.preWrap
-            ]
-        ]
-    , C.pseudoClass "focus-within"
-        [ C.outline3 (C.px 2) C.solid (C.hex "00F")
-        , CG.children
-            [ CG.span
-                [ C.color (C.hex "00F")
-                ]
             ]
         ]
     ]

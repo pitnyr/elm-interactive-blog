@@ -12,7 +12,8 @@ import ElmBook.StatefulOptions as BS
 type alias SharedState =
     { inputModel : InputChapter.Model
     , counterModel : CounterChapter.Model
-    , editorModel : EditorChapter.Model
+    , editorOne : EditorChapter.EditorModel
+    , editorTwo : EditorChapter.EditorModel
     }
 
 
@@ -20,7 +21,8 @@ initialState : SharedState
 initialState =
     { inputModel = InputChapter.init
     , counterModel = CounterChapter.init
-    , editorModel = EditorChapter.init
+    , editorOne = EditorChapter.initOne
+    , editorTwo = EditorChapter.initTwo
     }
 
 
